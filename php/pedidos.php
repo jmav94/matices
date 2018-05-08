@@ -54,14 +54,13 @@ if ( isset($_GET['daterange']) ){
 					destinatarios.codigopostal as codigopostal2,
 					destinatarios.fechaentrega,
 					destinatarios.horaentrega,
-					ventas_articulos.cantidad as cantidad,
 					( (SELECT SUM(total) FROM ventas_articulos WHERE idventa=ventas.idventas) - ventas.descuento) as total,
+					(SELECT cantidad FROM ventas_articulos WHERE idventa=ventas.idventas LIMIT 1) as cantidad1,
 					(SELECT SUM(cantidad) FROM ventas_pagos WHERE idventa=ventas.idventas) as pagos,
 					(SELECT estado FROM ventas_estados WHERE idventa=ventas.idventas ORDER BY idestados DESC LIMIT 1) as estatus
 					FROM ventas
 					LEFT JOIN clientes ON clientes.idclientes=ventas.idcliente
 					JOIN destinatarios ON destinatarios.idventa=ventas.idventas
-					JOIN ventas_articulos ON idventas=ventas.idventas 
 					WHERE destinatarios.fechaentrega BETWEEN '".$date[0]."' AND '".$date[1]."'
 					ORDER BY ventas.idventas DESC";
 				$url = "admin.php?m=pedidos&buscar=".$buscar;
@@ -79,8 +78,8 @@ if ( isset($_GET['daterange']) ){
 					destinatarios.codigopostal as codigopostal2,
 					destinatarios.fechaentrega,
 					destinatarios.horaentrega,
-					ventas_articulos.cantidad as cantidad,
 					( (SELECT SUM(total) FROM ventas_articulos WHERE idventa=ventas.idventas) - ventas.descuento) as total,
+					(SELECT cantidad FROM ventas_articulos WHERE idventa=ventas.idventas LIMIT 1) as cantidad1,
 					(SELECT SUM(cantidad) FROM ventas_pagos WHERE idventa=ventas.idventas) as pagos,
 					(SELECT estado FROM ventas_estados WHERE idventa=ventas.idventas ORDER BY idestados DESC LIMIT 1) as estatus
 					FROM ventas
@@ -139,7 +138,7 @@ $query = mysql_query($query) or die(mysql_error());
 					<td class="v-middle">'.@$q->horaentrega.'</td>
 					<td class="v-middle">'.$q->nombre.'</td>
 					<td class="v-middle">'.$q->nombre2.'</td>
-					<td>'.$q->direccion2.'<br><strong>Colonia:</strong> '.$q->colonia2.'<br><strong>CP:</strong> '.$q->cantidad.'</td>';
+					<td>'.$q->direccion2.'<br><strong>Colonia:</strong> '.$q->colonia2.'<br><strong>CP:</strong> '.$q->codigopostal2.'</td>';
 
 					$articulo = "";
 					$queryy = mysql_query("SELECT
@@ -154,7 +153,7 @@ $query = mysql_query($query) or die(mysql_error());
 						}
 
 					}
-				echo '<td class="v-middle">'.$articulo.'<strong>Cantidad:</strong> '.$q->cantidad.' </td>';
+				echo '<td class="v-middle">'.$articulo.'<strong>cantidad:</strong> '.$q->cantidad1.' </td>';
 				if ($q->pagos >= $q->total){
 					echo '<td class="text-center v-middle"><label class="label label-success"> liquidado</label></td>';
 				} else {
